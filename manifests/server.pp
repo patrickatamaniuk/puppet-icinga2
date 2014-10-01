@@ -26,6 +26,12 @@ class icinga2::server (
   $server_enabled_features = $icinga2::params::server_enabled_features,
   $server_disabled_features = $icinga2::params::server_disabled_features,
   $server_install_icingaweb = true,
+
+  $web_db_name = $icinga2::params::web_db_name,
+  $web_db_user = $icinga2::params::web_db_user,
+  $web_db_password = $icinga2::params::web_db_password,
+  $web_db_host = $icinga2::params::web_db_host,
+  $web_db_port = $icinga2::params::web_db_port,
 ) inherits icinga2::params {
 
   #Do some validation of parameters so we know we have the right data types:
@@ -40,6 +46,11 @@ class icinga2::server (
   validate_string($icinga2_server_package)
   validate_bool($server_install_nagios_plugins)
   validate_bool($server_install_icingaweb)
+  validate_string($web_db_name)
+  validate_string($web_db_user)
+  validate_string($web_db_password)
+  validate_string($web_db_host)
+  validate_string($web_db_port)
 
   #Pick set the right path where we can find the DB schema based on the OS...
   case $::operatingsystem {

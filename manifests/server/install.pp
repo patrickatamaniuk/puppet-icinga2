@@ -197,7 +197,7 @@ class icinga2::server::install::db inherits icinga2::server {
           method   => 'trust'
         }
 
-        postgresql::db{ $::icinga2::db_name_idoutils:
+        postgresql::db{ $::icinga2::server::db_name:
           db_name => $::icinga2::server::db_name,
           owner   => $::icinga2::server::db_user,
         }

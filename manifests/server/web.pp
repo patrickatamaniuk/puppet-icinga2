@@ -1,30 +1,96 @@
-# = Class: icinga2::web
+# == Class: icinga2::server::web
 #
-# This class provides the Icinga-web functionality
+# This class installs icinga-web for the Icinga 2 monitoring system.
 #
-# Rather than invoking this class directly, it should be invoked
-# via the main Icinga class. Generally, you should enable idoutils
-# for icinga-web to function.
+# === Parameters
 #
-# = Examples:
+# Coming soon...
 #
-#  class { '::icinga2':
-#    puppi                     => true,
-#    enable_idoutils           => true,
-#    enable_icingaweb          => true,
-#    enable_debian_repo_legacy => false,
-#    manage_repos              => true,
-#  }
+# === Examples
 #
+# Coming soon...
 #
 class icinga2::server::web inherits icinga2::server {
 
   include icinga2::server
 
-  Class['icinga2::server::install::repos']
-  ~>
+  class {'icinga2::server::web::repos': }  ~>
+  class {'icinga2::server::web::db': }     ~>
   package { 'icinga-web':
     ensure  => installed,
   }
+
+
+  $php_database_package = $server_db_type ? {
+    'mysql' => 'php5-mysql',
+    default => 'php5-pgsql',
+  }
+  package { ['php5', 'php5-cli', 'php-pear', 'php5-xmlrpc', 'php5-xsl', 'php5-gd', 'php5-ldap', $php_database_package]:
+    ensure => installed
+  }
+
+}
+
+
+class icinga2::server::web::repos inherits icinga2::server {
+
+  include icinga2::server
+
+  if $manage_repos == true {
+    case $::operatingsystem {
+      #Ubuntu systems:
+      'Ubuntu': {
+        #Include the apt module's base class so we can...
+        include apt
+        #...use the apt module to add the Icinga 2 PPA from launchpad.net:
+        # https://launchpad.net/~formorer/+archive/ubuntu/icinga
+        apt::ppa { 'ppa:formorer/icinga-web': }
+      }
+      #Fail if we're on any other OS:
+      default: { fail("${::operatingsystem} is not supported!") }
+    }
+  }
+
+}
+class icinga2::server::web::db inherits icinga2::server {
+
+  include icinga2::server
+
+  case $server_db_type {
+    'pgsql': {
+        postgresql::role{ $::icinga2::server::web_db_user:
+          rolename => $::icinga2::server::web_db_user,
+          password => $::icinga2::server::web_db_password,
+        }
+        postgresql::hba{ 'icinga_web_psql_hba_unix':
+          type     => 'local',
+          database => $::icinga2::server::web_db_name,
+          user     => $::icinga2::server::web_db_user,
+          method   => 'trust'
+        }
+        postgresql::hba{ 'icinga_web_psql_hba_ip4':
+          type     => 'host',
+          database => $::icinga2::server::web_db_name,
+          user     => $::icinga2::server::web_db_user,
+          address  => '127.0.0.1/32',
+          method   => 'trust'
+        }
+        postgresql::hba{ 'icinga_web_psql_hba_ip6':
+          type     => 'host',
+          database => $::icinga2::server::web_db_name,
+          user     => $::icinga2::server::web_db_user,
+          address  => '::1/128',
+          method   => 'trust'
+        }
+
+        postgresql::db{ $::icinga2::server::web_db_name:
+          db_name => $::icinga2::server::web_db_name,
+          owner   => $::icinga2::server::web_db_user,
+        }
+    } #pgsql
+
+    default: { fail("${server_db_type} is not supported!") }
+
+  } #case
 
 }

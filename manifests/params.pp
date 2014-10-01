@@ -56,6 +56,13 @@ class icinga2::params {
   $db_host = 'localhost'
   $db_port        = '5432'
 
+  #Database paramters
+  $web_db_name = 'icinga_web'
+  $web_db_user = 'icinga_web'
+  $web_db_password = 'icinga_web'
+  $web_db_host = 'localhost'
+  $web_db_port        = '5432'
+
   #Whether to install the plugin packages when the icinga2::server class is applied:
   $server_install_nagios_plugins = true
 
