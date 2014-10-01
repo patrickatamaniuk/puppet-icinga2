@@ -20,6 +20,7 @@ class icinga2::server::install inherits icinga2::server {
   #
   #Here, we're setting up the package repos first, then installing the packages:
   class{'icinga2::server::install::repos':} ~>
+  class{'icinga2::server::install::db':} ~>
   class{'icinga2::server::install::packages':} ~>
   class{'icinga2::server::install::execs':} ->
   Class['icinga2::server::install']
@@ -145,7 +146,7 @@ class icinga2::server::install::execs inherits icinga2::server {
       exec { 'postgres_schema_load':
         user    => 'root',
         path    => '/usr/bin:/usr/sbin:/bin/:/sbin',
-        command => "su - postgres -c 'export PGPASSWORD='${db_password}' && psql -U ${db_user} -h localhost -d ${db_name} < ${server_db_schema_path}' && export PGPASSWORD='' && touch /etc/icinga2/postgres_schema_loaded.txt",
+        command => "su - postgres -c 'export PGPASSWORD=\"${db_password}\" && psql -U ${db_user} -d ${db_name} < ${server_db_schema_path}' && export PGPASSWORD='' && touch /etc/icinga2/postgres_schema_loaded.txt",
         creates => '/etc/icinga2/postgres_schema_loaded.txt',
         require => Class['icinga2::server::install::packages'],
       }
@@ -161,4 +162,46 @@ class icinga2::server::install::execs inherits icinga2::server {
 
     default: { fail("${server_db_type} is not supported!") }
   }
+}
+
+class icinga2::server::install::db inherits icinga2::server {
+
+  include icinga2::server
+
+  case $server_db_type {
+    'pgsql': {
+        postgresql::role{ $::icinga2::server::db_user:
+          rolename => $::icinga2::server::db_user,
+          password => $::icinga2::server::db_password,
+        }
+        postgresql::hba{ 'icinga_ido_psql_hba_unix':
+          type     => 'local',
+          database => $::icinga2::server::db_name,
+          user     => $::icinga2::server::db_user,
+          method   => 'trust'
+        }
+        postgresql::hba{ 'icinga_ido_psql_hba_ip4':
+          type     => 'host',
+          database => $::icinga2::server::db_name,
+          user     => $::icinga2::server::db_user,
+          address  => '127.0.0.1/32',
+          method   => 'trust'
+        }
+        postgresql::hba{ 'icinga_ido_psql_hba_ip6':
+          type     => 'host',
+          database => $::icinga2::server::db_name,
+          user     => $::icinga2::server::db_user,
+          address  => '::1/128',
+          method   => 'trust'
+        }
+
+        postgresql::db{ $::icinga2::db_name_idoutils:
+          db_name => $::icinga2::server::db_name,
+          owner   => $::icinga2::server::db_user,
+        }
+    } #pgsql
+
+    default: { fail("${server_db_type} is not supported!") }
+
+  } #case
 }
