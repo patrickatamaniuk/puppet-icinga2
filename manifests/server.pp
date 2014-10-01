@@ -25,6 +25,7 @@ class icinga2::server (
   $install_mail_utils_package = $icinga2::params::install_mail_utils_package,
   $server_enabled_features = $icinga2::params::server_enabled_features,
   $server_disabled_features = $icinga2::params::server_disabled_features,
+  $server_install_icingaweb = true,
 ) inherits icinga2::params {
 
   #Do some validation of parameters so we know we have the right data types:
@@ -38,6 +39,7 @@ class icinga2::server (
   validate_string($package_provider)
   validate_string($icinga2_server_package)
   validate_bool($server_install_nagios_plugins)
+  validate_bool($server_install_icingaweb)
 
   #Pick set the right path where we can find the DB schema based on the OS...
   case $::operatingsystem {
@@ -85,5 +87,9 @@ class icinga2::server (
     disabled_features => $server_disabled_features,
   } ~>
   class {'icinga2::server::service':}
+
+  if ($server_install_icingaweb) {
+    class {'icinga2::server::web': }
+  }
 
 }
