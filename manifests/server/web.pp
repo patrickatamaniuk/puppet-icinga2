@@ -21,6 +21,8 @@ class icinga2::server::web inherits icinga2::server {
 
   include icinga2::server
 
+  Class['icinga2::server::install::repos']
+  ~>
   package { 'icinga-web':
     ensure  => installed,
   }
