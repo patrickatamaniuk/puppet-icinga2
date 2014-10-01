@@ -25,6 +25,8 @@ class icinga2::server::install inherits icinga2::server {
   class{'icinga2::server::install::execs':} ->
   Class['icinga2::server::install']
 
+  class{'icinga2::server::install::ido':}
+
 }
 
 class icinga2::server::install::repos inherits icinga2::server {
@@ -203,5 +205,25 @@ class icinga2::server::install::db inherits icinga2::server {
 
     default: { fail("${server_db_type} is not supported!") }
 
+  } #case
+}
+
+class icinga2::server::install::ido inherits icinga2::server {
+
+  include icinga2::server
+  case $server_db_type {
+    'pgsql': {
+        icinga2::object::idopgsqlconnection { 'postgres_connection':
+           target_dir => '/etc/icinga2/features-enabled',
+           target_file_name => 'ido-pgsql.conf',
+           host             => $db_host,
+           port             => $db_port,
+           user             => $db_user,
+           password         => $db_password,
+           database         => $db_name,
+           categories => ['DbCatConfig', 'DbCatState', 'DbCatAcknowledgement', 'DbCatComment', 'DbCatDowntime', 'DbCatEventHandler' ],
+        }
+    } #pgsql
+    default: { fail("${server_db_type} is not supported!") }
   } #case
 }
