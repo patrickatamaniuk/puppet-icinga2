@@ -19,6 +19,8 @@ class icinga2::server::web inherits icinga2::server {
   package { 'icinga-web':
     ensure  => installed,
   }
+  ->
+  class {'icinga2::server::web::config': }
 
 
   $php_database_package = $server_db_type ? {
@@ -93,4 +95,31 @@ class icinga2::server::web::db inherits icinga2::server {
 
   } #case
 
+}
+
+class icinga2::server::web::config inherits icinga2::server {
+
+  include icinga2::server
+
+  $protocol = $server_db_type ? {
+    'mysql' => 'mysql',
+    default => 'pgsql',
+  }
+  file{'/etc/icinga-web/conf.d/database-web.xml':
+    content => template('icinga2/web/database-web.xml.erb'),
+    notify  => Exec['icinga-web-clearcaches'],
+  }
+  file{'/etc/icinga-web/conf.d/database-ido.xml':
+    content => template('icinga2/web/database-ido.xml.erb'),
+    notify  => Exec['icinga-web-clearcaches'],
+  }
+  file{'/etc/icinga-web/conf.d/access.xml':
+    content => template('icinga2/web/access.xml.erb'),
+    notify  => Exec['icinga-web-clearcaches'],
+  }
+
+  exec{ 'icinga-web-clearcaches':
+    refreshonly => true,
+    command     => '/usr/lib/icinga-web/bin/clearcache.sh'
+  }
 }
