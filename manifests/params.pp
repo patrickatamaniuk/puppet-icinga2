@@ -50,8 +50,8 @@ class icinga2::params {
   $install_mail_utils_package = false
 
   #Database paramters
-  $db_name = 'icinga2_data'
-  $db_user = 'icinga2'
+  $db_name = 'icinga2idopgsql'
+  $db_user = 'icinga2idopgsql'
   $db_password = 'password'
   $db_host = 'localhost'
   $db_port        = '5432'
@@ -59,7 +59,7 @@ class icinga2::params {
   #Database paramters
   $web_db_name = 'icinga_web'
   $web_db_user = 'icinga_web'
-  $web_db_password = 'icinga_web'
+  $web_db_password = 'password'
   $web_db_host = 'localhost'
   $web_db_port        = '5432'
 
