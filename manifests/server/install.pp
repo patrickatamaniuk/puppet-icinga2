@@ -168,34 +168,34 @@ class icinga2::server::install::db inherits icinga2::server {
 
   case $server_db_type {
     'pgsql': {
-        postgresql::role{ $::icinga2::server::db_user:
-          rolename => $::icinga2::server::db_user,
-          password => $::icinga2::server::db_password,
+        postgresql::role{ $db_user:
+          rolename => $db_user,
+          password => $db_password,
         }
         postgresql::hba{ 'icinga_ido_psql_hba_unix':
           type     => 'local',
-          database => $::icinga2::server::db_name,
-          user     => $::icinga2::server::db_user,
-          method   => 'trust'
+          database => $db_name,
+          user     => $db_user,
+          method   => 'md5'
         }
         postgresql::hba{ 'icinga_ido_psql_hba_ip4':
           type     => 'host',
-          database => $::icinga2::server::db_name,
-          user     => $::icinga2::server::db_user,
+          database => $db_name,
+          user     => $db_user,
           address  => '127.0.0.1/32',
-          method   => 'trust'
+          method   => 'md5'
         }
         postgresql::hba{ 'icinga_ido_psql_hba_ip6':
           type     => 'host',
-          database => $::icinga2::server::db_name,
-          user     => $::icinga2::server::db_user,
+          database => $db_name,
+          user     => $db_user,
           address  => '::1/128',
-          method   => 'trust'
+          method   => 'md5'
         }
 
-        postgresql::db{ $::icinga2::server::db_name:
-          db_name => $::icinga2::server::db_name,
-          owner   => $::icinga2::server::db_user,
+        postgresql::db{ $db_name:
+          db_name => $db_name,
+          owner   => $db_user,
         }
     } #pgsql
 
@@ -205,19 +205,21 @@ class icinga2::server::install::db inherits icinga2::server {
 }
 
 class icinga2::server::install::ido inherits icinga2::server {
-
   include icinga2::server
   case $server_db_type {
     'pgsql': {
         icinga2::object::idopgsqlconnection { 'postgres_connection':
-           target_dir => '/etc/icinga2/features-enabled',
+           target_dir => '/etc/icinga2/features-available',
            target_file_name => 'ido-pgsql.conf',
            host             => $db_host,
            port             => $db_port,
            user             => $db_user,
            password         => $db_password,
            database         => $db_name,
-           categories => ['DbCatConfig', 'DbCatState', 'DbCatAcknowledgement', 'DbCatComment', 'DbCatDowntime', 'DbCatEventHandler' ],
+           table_prefix     => undef,
+           categories       => [],
+           cleanup          => {},
+           instance_name    => '',
         }
     } #pgsql
     default: { fail("${server_db_type} is not supported!") }

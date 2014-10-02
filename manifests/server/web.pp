@@ -62,34 +62,35 @@ class icinga2::server::web::db inherits icinga2::server {
 
   case $server_db_type {
     'pgsql': {
-        postgresql::role{ $::icinga2::server::web_db_user:
-          rolename => $::icinga2::server::web_db_user,
-          password => $::icinga2::server::web_db_password,
+        $web_pwhash0 = md5("${web_db_password}${web_db_user}")
+        postgresql::role{ $web_db_user:
+          rolename => $web_db_user,
+          password => "md5${web_pwhash0}",
         }
         postgresql::hba{ 'icinga_web_psql_hba_unix':
           type     => 'local',
-          database => $::icinga2::server::web_db_name,
-          user     => $::icinga2::server::web_db_user,
-          method   => 'trust'
+          database => $web_db_name,
+          user     => $web_db_user,
+          method   => 'md5'
         }
         postgresql::hba{ 'icinga_web_psql_hba_ip4':
           type     => 'host',
-          database => $::icinga2::server::web_db_name,
-          user     => $::icinga2::server::web_db_user,
+          database => $web_db_name,
+          user     => $web_db_user,
           address  => '127.0.0.1/32',
-          method   => 'trust'
+          method   => 'md5'
         }
         postgresql::hba{ 'icinga_web_psql_hba_ip6':
           type     => 'host',
-          database => $::icinga2::server::web_db_name,
-          user     => $::icinga2::server::web_db_user,
+          database => $web_db_name,
+          user     => $web_db_user,
           address  => '::1/128',
-          method   => 'trust'
+          method   => 'md5'
         }
 
-        postgresql::db{ $::icinga2::server::web_db_name:
-          db_name => $::icinga2::server::web_db_name,
-          owner   => $::icinga2::server::web_db_user,
+        postgresql::db{ $web_db_name:
+          db_name => $web_db_name,
+          owner   => $web_db_user,
         }
     } #pgsql
 
@@ -107,7 +108,7 @@ class icinga2::server::web::config inherits icinga2::server {
   icinga2::server::features::enable { 'livestatus': }
   icinga2::server::features::enable { 'icingastatus': }
   icinga2::server::features::enable { 'perfdata': }
-  icinga2::server::features::enable { 'graphite': }
+  #icinga2::server::features::enable { 'graphite': }
 
   $protocol = $server_db_type ? {
     'mysql' => 'mysql',
