@@ -42,11 +42,13 @@ class icinga2::server::web::repos inherits icinga2::server {
     case $::operatingsystem {
       #Ubuntu systems:
       'Ubuntu': {
-        #Include the apt module's base class so we can...
-        include apt
-        #...use the apt module to add the Icinga 2 PPA from launchpad.net:
-        # https://launchpad.net/~formorer/+archive/ubuntu/icinga
-        apt::ppa { 'ppa:formorer/icinga-web': }
+        apt::source { "icinga-web":
+          location          => 'http://ppa.launchpad.net/formorer/icinga-web/ubuntu',
+          release           => $lsbdistcodename,
+          repos             => 'main',
+          key               => '36862847',
+          include_src       => false,
+        }
       }
       #Fail if we're on any other OS:
       default: { fail("${::operatingsystem} is not supported!") }
@@ -100,6 +102,12 @@ class icinga2::server::web::db inherits icinga2::server {
 class icinga2::server::web::config inherits icinga2::server {
 
   include icinga2::server
+
+  icinga2::server::features::enable { 'command': }
+  icinga2::server::features::enable { 'livestatus': }
+  icinga2::server::features::enable { 'icingastatus': }
+  icinga2::server::features::enable { 'perfdata': }
+  icinga2::server::features::enable { 'graphite': }
 
   $protocol = $server_db_type ? {
     'mysql' => 'mysql',

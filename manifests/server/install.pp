@@ -50,11 +50,13 @@ class icinga2::server::install::repos inherits icinga2::server {
 
       #Ubuntu systems:
       'Ubuntu': {
-        #Include the apt module's base class so we can...
-        include apt
-        #...use the apt module to add the Icinga 2 PPA from launchpad.net:
-        # https://launchpad.net/~formorer/+archive/ubuntu/icinga
-        apt::ppa { 'ppa:formorer/icinga': }
+        apt::source { "icinga":
+          location          => 'http://ppa.launchpad.net/formorer/icinga/ubuntu',
+          release           => $lsbdistcodename,
+          repos             => 'main',
+          key               => '36862847',
+          include_src       => false,
+        }
       }
 
       #Debian systems:
@@ -153,13 +155,7 @@ class icinga2::server::install::execs inherits icinga2::server {
         require => Class['icinga2::server::install::packages'],
       }
       #Enable the Postgres IDO module:
-      exec { 'postgres_module_enable':
-        user    => 'root',
-        path    => '/usr/bin:/usr/sbin:/bin/:/sbin',
-        command => '/usr/sbin/icinga2-enable-feature ido-pgsql && touch /etc/icinga2/postgres_module_loaded.txt',
-        creates => '/etc/icinga2/postgres_module_loaded.txt',
-        require => Exec['postgres_schema_load'],
-      }
+      icinga2::server::features::enable { 'ido-pgsql': }
     }
 
     default: { fail("${server_db_type} is not supported!") }
