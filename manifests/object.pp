@@ -10,4 +10,4 @@
 # more details.
 #
 
-class icinga2::objects { }
+class icinga2::object { }

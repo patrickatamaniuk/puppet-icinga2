@@ -57,6 +57,8 @@ define icinga2::object::host (
   validate_string($target_file_group)
   validate_string($target_file_mode)
 
+  $servicevars = get_exported_var($object_hostname,"icinga_servicevar_.*",[]) #not toplevel $::fqdn but local one
+
   file {"${target_dir}/${target_file_name}":
     ensure  => file,
     owner   => $target_file_owner,

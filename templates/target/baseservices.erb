@@ -1,0 +1,167 @@
+
+# Load Average
+object Service "Load" {
+    import "<%= @use -%>"
+    host_name = "<%= @host_name -%>"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_load"
+}
+
+# Swap Usage
+object Service "Swap" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Swap_Usage"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_swap"
+}
+
+# Disk Usage
+object Service "Disk" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "All_Disks_Usage"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_all_disks_param"
+}
+
+# Zombie Processes
+object Service "Zombies" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Zombie_Processes"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_zombie_procs"
+}
+
+# Connected Users
+object Service "Users" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Connected_Users"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_users"
+}
+
+# Mail Queues
+#object Service "Mailqueue" {
+#    import "<%= @use -%>"
+#    host_name    = "<%= @host_name %>"
+#    display_name = "Mail_Queue"
+#    check_command = "nrpe"
+#    vars.nrpe_command = "check_mailq"
+#}
+
+<% if scope.lookupvar("ntp_server") != "" and scope.lookupvar("ntp_server") != :undefined -%>
+# NTP Sync
+object Service "ntp sync" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "NTP_Sync"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_ntp"
+}
+<% end -%>
+
+<% if scope.lookupvar("osfamily") == "Debian" -%>
+## APT Updates
+object Service "apt" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "APT_Updates"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_apt"
+}
+<% end -%>
+<% if scope.lookupvar("osfamily") == "RedHat" -%>
+## Yum Updates
+object Service "yum" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "YUM_Updates"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_yum"
+}
+<% end -%>
+
+<% if scope.lookupvar("nrpe::enable_sysstat") -%>
+object Service "Pagestat" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Pagestat"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_sar_pagestat"
+}
+
+object Service "Cpu" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "CPU"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_sar_cpu"
+}
+
+object Service "Mem Util" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Memory_Util"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_sar_memory_util"
+}
+
+object Service "Mem Stat" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Memory_Stat"
+    check_command = "nrpe"
+    vars.nrpe_command = "check_sar_memory_stat
+
+}
+
+object Service "IO" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "IO_Transfer"
+    vars.nrpe_command = "check_sar_io_transfer
+
+}
+
+object Service "Queueln load" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Queueln_Load"
+    vars.nrpe_command = "check_sar_queueln_load
+
+}
+<% unless (scope.lookupvar("osfamily") == "RedHat" and scope.lookupvar("lsbmajdistrelease").to_i < 6) %>
+object Service "Swap util" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Swap_Util"
+    vars.nrpe_command = "check_sar_swap_util
+
+}
+<% end %>
+object Service "Swap stat" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Swap_Stat"
+    vars.nrpe_command = "check_sar_swap_stat
+
+}
+
+object Service "Task" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Task"
+    vars.nrpe_command = "check_sar_task
+
+}
+
+object Service "Kernel" {
+    import "<%= @use -%>"
+    host_name    = "<%= @host_name %>"
+    display_name = "Kernel"
+    vars.nrpe_command = "check_sar_kernel"
+}
+<% end -%>

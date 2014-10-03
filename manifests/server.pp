@@ -32,6 +32,8 @@ class icinga2::server (
   $web_db_password = $icinga2::params::web_db_password,
   $web_db_host = $icinga2::params::web_db_host,
   $web_db_port = $icinga2::params::web_db_port,
+
+  $server_collect_objects = true,
 ) inherits icinga2::params {
 
   #Do some validation of parameters so we know we have the right data types:
@@ -103,4 +105,19 @@ class icinga2::server (
     class {'icinga2::server::web': }
   }
 
+  if ($server_collect_objects) {
+    #Collect all @@icinga2::object::host resources from PuppetDB that were exported by other machines:
+    Icinga2::Object::Host <<| |>> { }
+    Icinga2::Object::Hostgroup <<| |>> { }
+    Icinga2::Object::Service <<| |>> { }
+    Icinga2::Object::Servicegroup <<| |>> { }
+
+    # create apply Service objects for standard nrpe checks
+    include icinga2::server::stdservices
+
+    # collect baseservices
+    include icinga2::target
+    File <<| tag == "icinga2_check_${icinga2::example42adapter::target::magic_tag}" |>>
+
+  }
 }

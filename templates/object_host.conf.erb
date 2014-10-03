@@ -28,6 +28,11 @@ object Host "<%= @object_hostname %>" {
   <%- if @groups.length != 0 -%>
   groups = [ <%- @groups.each do |group| -%> "<%= group %>", <%- end -%>]
   <%- end -%>
+  <%- if @servicevars and @servicevars.length != 0 -%>
+  <%- @servicevars.each do |servicevar| -%>
+  vars.<%= servicevar %> = true
+  <%- end -%>
+  <%- end -%>
   <%- if @vars.empty? != true  -%>
   <%- @vars.each_pair do |key, value| -%>
   vars.<%= key %> = "<%= value %>"
