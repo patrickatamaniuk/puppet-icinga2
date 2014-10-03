@@ -216,10 +216,7 @@ class icinga2::server::install::ido inherits icinga2::server {
            user             => $db_user,
            password         => $db_password,
            database         => $db_name,
-           table_prefix     => undef,
            categories       => [],
-           cleanup          => {},
-           instance_name    => '',
         }
     } #pgsql
     default: { fail("${server_db_type} is not supported!") }
