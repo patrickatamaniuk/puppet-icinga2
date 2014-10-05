@@ -118,8 +118,9 @@ class icinga2::server (
     # collect baseservices
     include icinga2::target
     File <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
-    # process service apply configuration objects
-    Icinga2::Server::Stdservices::Apply_process_service <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
+    # apply service configuration objects
+    Icinga2::Server::Stdservices::Apply_nrpe_service <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
+    Icinga2::Server::Stdservices::Apply_port_service <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
 
   }
 }
