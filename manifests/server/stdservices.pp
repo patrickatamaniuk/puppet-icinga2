@@ -124,3 +124,37 @@ define icinga2::server::stdservices::apply_nrpe_service(
       }
   }
 }
+
+#
+# this is used on targets as exported resource
+# to announce that they use a service.
+# the icinga server collects these and provides
+# service apply configurations then.
+#
+# the service is one of the icinga check_commands
+#
+define icinga2::server::stdservices::apply_check_command_service(
+  $object_servicename = $name,
+  $command            = $name,
+  $assign_where       = "host.vars.check_icinga_stdservices == true",
+  $display_name       = "${name}",
+  $template_to_import = 'generic-service',
+  $target_dir         = "/etc/icinga2/objects/applys",
+  $target_file_name   = undef,
+  $vars               = {},
+) {
+  $svc_name = "${object_servicename}"
+  $real_target_filename = pick($target_file_name, "${object_servicename}.conf")
+  if (!defined(Icinga2::Object::Apply_service_to_host[$svc_name])) {
+      icinga2::object::apply_service_to_host { $svc_name:
+        object_servicename => $object_servicename,
+        display_name       => $display_name,
+        check_command      => $command,
+        template_to_import => $template_to_import,
+        target_dir         => $target_dir,
+        target_file_name   => $real_target_filename,
+        assign_where       => $assign_where,
+        vars               => $vars,
+      }
+  }
+}

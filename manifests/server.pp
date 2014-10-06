@@ -121,6 +121,7 @@ class icinga2::server (
     # apply service configuration objects
     Icinga2::Server::Stdservices::Apply_nrpe_service <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
     Icinga2::Server::Stdservices::Apply_port_service <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
+    Icinga2::Server::Stdservices::Apply_check_command_service <<| tag == "icinga2_check_${icinga2::target::magic_tag}" |>>
 
   }
 }
