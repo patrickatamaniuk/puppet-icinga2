@@ -33,7 +33,7 @@ object Host "<%= @object_hostname %>" {
   <%- if @vars.empty? != true  -%>
   <%- @vars.each_pair do |key, value|
     quote = '"'
-    quote = '' if (value.class == TrueClass || value.class == FalseClass)
+    quote = '' if [TrueClass, FalseClass, Fixnum, Float].include? value.class
   -%>
   vars.<%= key %> = <%= quote %><%= value %><%= quote %>
   <%-
